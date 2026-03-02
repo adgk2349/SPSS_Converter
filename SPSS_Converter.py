@@ -38,7 +38,7 @@ class SPSSConverterApp(TkinterDnD.Tk):
 
         self.version_label = ctk.CTkLabel(
             self.header_frame, 
-            text="v1.2.2", 
+            text="v1.2.3", 
             font=ctk.CTkFont(family="Inter", size=13),
             text_color="#555555"
         )
@@ -51,7 +51,7 @@ class SPSSConverterApp(TkinterDnD.Tk):
             height=28,
             fg_color="#2A2A2A",
             hover_color="#CC3333",
-            corner_radius=14,
+            corner_radius=14, # Fully rounded
             command=self.quit
         )
         self.exit_button.pack(side="right")
@@ -60,8 +60,8 @@ class SPSSConverterApp(TkinterDnD.Tk):
         self.drop_container = ctk.CTkFrame(
             self.bg_frame,
             fg_color="#121212",
-            corner_radius=22,  # Increased for better visibility
-            border_color="#2A2A2A",
+            corner_radius=25,  # Distinct rounding
+            border_color="#333333",
             border_width=1
         )
         self.drop_container.pack(fill="both", expand=True, padx=35, pady=0)
@@ -69,15 +69,15 @@ class SPSSConverterApp(TkinterDnD.Tk):
         self.drop_frame = ctk.CTkFrame(
             self.drop_container, 
             fg_color="transparent",
-            corner_radius=22
+            corner_radius=25
         )
-        self.drop_frame.pack(fill="both", expand=True)
+        self.drop_frame.pack(fill="both", expand=True, padx=2, pady=2) # Inset to prevent clipping
 
         # Drag & Drop binding
         self.drop_frame.drop_target_register(DND_FILES)
         self.drop_frame.dnd_bind('<<Drop>>', self.handle_drop)
 
-        # Drop Zone Content
+        # Drop Zone Content (no change)
         self.icon_label = ctk.CTkLabel(
             self.drop_frame, 
             text="📥", 
@@ -104,7 +104,7 @@ class SPSSConverterApp(TkinterDnD.Tk):
             font=ctk.CTkFont(weight="bold"),
             fg_color="#0A84FF",
             hover_color="#0066CC",
-            corner_radius=12,
+            corner_radius=21,  # 50% of height for circular ends
             command=self.browse_file
         )
         self.select_button.pack(side="left", fill="x", expand=True, padx=(0, 10))
@@ -116,7 +116,7 @@ class SPSSConverterApp(TkinterDnD.Tk):
             height=42,
             fg_color="#2A2A2A",
             hover_color="#333333",
-            corner_radius=12,
+            corner_radius=21,  # 50% of height for circular shape
             command=self.show_about
         )
         self.about_btn.pack(side="right")
