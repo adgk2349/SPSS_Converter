@@ -36,25 +36,31 @@ class SPSSConverterApp(ctk.CTk):
             except:
                 pass
 
-        # Window Setup - Frameless
-        self.overrideredirect(True)
+        # Window Setup
         self.geometry("500x540")
         
-        # macOS Transparency Hard-Fix (Avoiding ValueError)
+        # --- Surgical macOS Rounded Corner Fix ---
         if platform.system() == "Darwin":
-            # Do NOT use fg_color="transparent" on root CTk window (causes ValueError)
-            # Use native Tkinter background config instead
-            self.config(bg="systemTransparent")
+            # 1. Use a native macOS window style that supports rounding and removes titlebar
+            # 'moveableModal' with 'none' is a robust way to hide titlebar without overrideredirect(True) issues
+            try:
+                self.tk.call("::tk::unsupported::MacWindowStyle", "style", self._w, "moveableByWindowBackground", "none")
+            except:
+                self.overrideredirect(True) # Fallback if specialty command fails
+            
+            # 2. Force transparency
+            self.config(bg='systemTransparent')
             self.wm_attributes("-transparent", True)
             self.attributes("-alpha", 0.99)
         else:
+            self.overrideredirect(True)
             self.configure(fg_color="#1A1A1A")
         
         # Windows Dragging Logic
         self._offsetx = 0
         self._offsety = 0
 
-        # Main Rounded Container (Drawing the actual window)
+        # Main Rounded Container (Drawing the window boundary)
         self.main_container = ctk.CTkFrame(
             self, 
             fg_color="#1A1A1A", 
@@ -62,10 +68,9 @@ class SPSSConverterApp(ctk.CTk):
             border_width=1,
             border_color="#2A2A2A"
         )
-        # Small padding to prevent the OS from clipping the rounded corners
-        self.main_container.pack(fill="both", expand=True, padx=1, pady=1) 
+        self.main_container.pack(fill="both", expand=True, padx=2, pady=2) 
         
-        # Bind dragging to the entire window
+        # Dragging bindings
         self.main_container.bind("<Button-1>", self.start_drag)
         self.main_container.bind("<B1-Motion>", self.do_drag)
 
@@ -87,7 +92,7 @@ class SPSSConverterApp(ctk.CTk):
 
         self.version_label = ctk.CTkLabel(
             self.header_frame, 
-            text="v1.3.7", 
+            text="v1.3.8", 
             font=ctk.CTkFont(family="Inter", size=13),
             text_color="#555555"
         )
@@ -222,13 +227,31 @@ class SPSSConverterApp(ctk.CTk):
 
     def show_about(self):
         about_window = ctk.CTkToplevel(self)
+        # Apply the same macOS fix for About window
+        if platform.system() == "Darwin":
+             try:
+                about_window.tk.call("::tk::unsupported::MacWindowStyle", "style", about_window._w, "moveableByWindowBackground", "none")
+                about_window.config(bg='systemTransparent')
+                about_window.wm_attributes("-transparent", True)
+             except:
+                about_window.overrideredirect(True)
+        else:
+            about_window.overrideredirect(True)
+
         about_window.title("About")
         about_window.geometry("380x280")
         about_window.resizable(False, False)
-        about_window.configure(fg_color="#1A1A1A")
-        about_window.after(100, lambda: about_window.focus())
+        
+        main_about_frame = ctk.CTkFrame(
+            about_window, 
+            fg_color="#1A1A1A", 
+            corner_radius=25,
+            border_width=1,
+            border_color="#2A2A2A"
+        )
+        main_about_frame.pack(fill="both", expand=True, padx=1, pady=1)
 
-        content_frame = ctk.CTkFrame(about_window, fg_color="transparent")
+        content_frame = ctk.CTkFrame(main_about_frame, fg_color="transparent")
         content_frame.pack(pady=30, padx=30, fill="both", expand=True)
 
         ctk.CTkLabel(
@@ -240,7 +263,7 @@ class SPSSConverterApp(ctk.CTk):
 
         ctk.CTkLabel(
             content_frame, 
-            text="Version 1.3.7", 
+            text="Version 1.3.8", 
             font=ctk.CTkFont(size=12),
             text_color="#666666"
         ).pack(pady=(0, 20))
@@ -272,6 +295,8 @@ class SPSSConverterApp(ctk.CTk):
             corner_radius=15,
             command=about_window.destroy
         ).pack(pady=(30, 0))
+
+        about_window.after(100, lambda: about_window.focus())
 
 if __name__ == "__main__":
     app = SPSSConverterApp()
