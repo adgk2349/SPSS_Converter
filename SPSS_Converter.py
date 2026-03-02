@@ -16,7 +16,7 @@ class SPSSConverterApp(TkinterDnD.Tk):
         # Window Setup
         self.title("SPSS Converter")
         self.geometry("500x550")
-        self.configure(fg_color="#1A1A1A")
+        self.configure(bg="#1A1A1A")
         self.resizable(False, False)
 
         # Main Container
