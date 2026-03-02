@@ -1,12 +1,19 @@
 # -*- mode: python ; coding: utf-8 -*-
+from PyInstaller.utils.hooks import collect_all
+
+datas = [('SPSSCSV.png', '.')]
+binaries = []
+hiddenimports = ['pyreadstat', 'pandas']
+tmp_ret = collect_all('pyreadstat')
+datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
 
 
 a = Analysis(
     ['SPSS_Converter.py'],
     pathex=[],
-    binaries=[],
-    datas=[],
-    hiddenimports=[],
+    binaries=binaries,
+    datas=datas,
+    hiddenimports=hiddenimports,
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
@@ -35,10 +42,13 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    version='file_version_info.txt',
+    icon=['SPSSCSV.icns'],
 )
+
 app = BUNDLE(
     exe,
     name='SPSS_Converter.app',
-    icon=None,
+    icon='SPSSCSV.icns',
     bundle_identifier=None,
 )

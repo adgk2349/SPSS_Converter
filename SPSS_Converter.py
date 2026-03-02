@@ -137,9 +137,9 @@ class DropZone(QWidget):
         self.update()
         urls = event.mimeData().urls()
         if urls:
-            path = urls[0].toLocalFile()
-            if self._on_drop:
-                self._on_drop(path)
+            paths = [url.toLocalFile() for url in urls if url.isLocalFile()]
+            if paths and self._on_drop:
+                self._on_drop(paths)
 
 
 # ══════════════════════════════════════════════════════════════
@@ -341,33 +341,50 @@ class SPSSConverterApp(BaseRoundedWidget):
 
     # ── 파일 처리 ─────────────────────────────────────────────
     def browse_file(self):
-        path, _ = QFileDialog.getOpenFileName(
-            self, "Select SPSS File", "",
+        paths, _ = QFileDialog.getOpenFileNames(
+            self, "Select SPSS Files", "",
             "SPSS Files (*.sav);;All Files (*)"
         )
-        if path:
-            self.process_conversion(path)
+        if paths:
+            self.process_conversion(paths)
 
-    def process_conversion(self, file_path: str):
-        base, ext = os.path.splitext(file_path)
-        if ext.lower() != ".sav":
-            self._set_status("Invalid file format", "#FF453A")
-            QMessageBox.critical(self, "Error", "Please select a valid .sav file.")
+    def process_conversion(self, file_paths):
+        if not isinstance(file_paths, list):
+            file_paths = [file_paths]
+            
+        total = len(file_paths)
+        if total == 0:
             return
-
-        self._set_status("Converting…", "#FF9F0A")
+            
+        success_count = 0
+        self._set_status(f"Converting {total} file(s)…", "#FF9F0A")
         QApplication.processEvents()
-
-        try:
-            df = pd.read_spss(file_path)
-            csv_path = f"{base}.csv"
-            df.to_csv(csv_path, index=False)
-            name = os.path.basename(csv_path)
-            self._set_status(f"Done: {name}", "#32D74B")
-        except Exception as e:
-            self._set_status("Error occurred", "#FF453A")
-            QMessageBox.critical(self, "Error",
-                                 f"Failed to convert:\n{e}")
+        
+        for file_path in file_paths:
+            base, ext = os.path.splitext(file_path)
+            if ext.lower() != ".sav":
+                continue
+                
+            try:
+                df = pd.read_spss(file_path)
+                csv_path = f"{base}.csv"
+                df.to_csv(csv_path, index=False)
+                success_count += 1
+            except Exception as e:
+                print(f"Failed to convert {file_path}: {e}")
+                
+        if success_count == total:
+            msg = f"Done: {total} file(s) converted"
+            color = "#32D74B"
+        elif success_count > 0:
+            msg = f"Done: {success_count}/{total} files converted"
+            color = "#FF9F0A"
+        else:
+            msg = "Error: No valid .sav files converted"
+            color = "#FF453A"
+            QMessageBox.critical(self, "Error", "Failed to convert the selected file(s).")
+            
+        self._set_status(msg, color)
 
     def _set_status(self, text: str, color: str):
         self.status_label.setText(text)
