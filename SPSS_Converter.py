@@ -36,16 +36,21 @@ class SPSSConverterApp(ctk.CTk):
             except:
                 pass
 
-        # Window Setup
-        self.title("SPSS Converter")
+        # Window Setup - Frameless
+        self.overrideredirect(True) # Removes title bar
         self.geometry("500x540")
         self.configure(fg_color="#1A1A1A")
         self.attributes("-alpha", 0.98)
-        self.resizable(False, False)
+        
+        # Windows Dragging Logic
+        self._offsetx = 0
+        self._offsety = 0
 
-        # Header Section
+        # Header Section (Acts as Drag Area)
         self.header_frame = ctk.CTkFrame(self, fg_color="transparent")
         self.header_frame.pack(fill="x", padx=35, pady=(35, 15))
+        self.header_frame.bind("<Button-1>", self.start_drag)
+        self.header_frame.bind("<B1-Motion>", self.do_drag)
 
         self.title_label = ctk.CTkLabel(
             self.header_frame, 
@@ -54,10 +59,12 @@ class SPSSConverterApp(ctk.CTk):
             text_color="#FFFFFF"
         )
         self.title_label.pack(side="left")
+        self.title_label.bind("<Button-1>", self.start_drag)
+        self.title_label.bind("<B1-Motion>", self.do_drag)
 
         self.version_label = ctk.CTkLabel(
             self.header_frame, 
-            text="v1.2.9", 
+            text="v1.3.0", 
             font=ctk.CTkFont(family="Inter", size=13),
             text_color="#555555"
         )
@@ -91,7 +98,7 @@ class SPSSConverterApp(ctk.CTk):
         except Exception:
             pass
 
-        # Drop Zone Content - Emojis removed
+        # Drop Zone Content
         self.instruction_label = ctk.CTkLabel(
             self.drop_container, 
             text="파일을 이곳으로 끌어다 놓으세요\nDrag and drop files here", 
@@ -136,6 +143,15 @@ class SPSSConverterApp(ctk.CTk):
             text_color="#333333"
         )
         self.status_label.pack(pady=(0, 15))
+
+    def start_drag(self, event):
+        self._offsetx = event.x
+        self._offsety = event.y
+
+    def do_drag(self, event):
+        x = self.winfo_x() + event.x - self._offsetx
+        y = self.winfo_y() + event.y - self._offsety
+        self.geometry(f"+{x}+{y}")
 
     def handle_drop(self, event):
         data = event.data
