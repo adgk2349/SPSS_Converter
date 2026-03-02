@@ -15,13 +15,17 @@ class SPSSConverterApp(TkinterDnD.Tk):
 
         # Window Setup
         self.title("SPSS Converter")
-        self.geometry("500x520")
-        self.configure(bg="#1A1A1A")  # Consistent background
+        self.geometry("500x530")
+        self.configure(bg="#1A1A1A")
         self.attributes("-alpha", 0.98)
         self.resizable(False, False)
 
-        # Main Layout (no outer padding to avoid window-in-window look)
-        self.header_frame = ctk.CTkFrame(self, fg_color="transparent")
+        # Main Wrapper (Ensures proper rounding for child frames)
+        self.bg_frame = ctk.CTkFrame(self, fg_color="#1A1A1A", corner_radius=0)
+        self.bg_frame.pack(fill="both", expand=True)
+
+        # Header Section
+        self.header_frame = ctk.CTkFrame(self.bg_frame, fg_color="transparent")
         self.header_frame.pack(fill="x", padx=35, pady=(35, 15))
 
         self.title_label = ctk.CTkLabel(
@@ -34,7 +38,7 @@ class SPSSConverterApp(TkinterDnD.Tk):
 
         self.version_label = ctk.CTkLabel(
             self.header_frame, 
-            text="v1.2.1", 
+            text="v1.2.2", 
             font=ctk.CTkFont(family="Inter", size=13),
             text_color="#555555"
         )
@@ -52,13 +56,11 @@ class SPSSConverterApp(TkinterDnD.Tk):
         )
         self.exit_button.pack(side="right")
 
-        # Header Section (no change)
-
         # Drop Zone (Central unified area)
         self.drop_container = ctk.CTkFrame(
-            self,
+            self.bg_frame,
             fg_color="#121212",
-            corner_radius=15,  # Unified radius
+            corner_radius=22,  # Increased for better visibility
             border_color="#2A2A2A",
             border_width=1
         )
@@ -67,7 +69,7 @@ class SPSSConverterApp(TkinterDnD.Tk):
         self.drop_frame = ctk.CTkFrame(
             self.drop_container, 
             fg_color="transparent",
-            corner_radius=15  # Unified radius
+            corner_radius=22
         )
         self.drop_frame.pack(fill="both", expand=True)
 
@@ -92,7 +94,7 @@ class SPSSConverterApp(TkinterDnD.Tk):
         self.instruction_label.place(relx=0.5, rely=0.62, anchor="center")
 
         # Footer Actions
-        self.footer_frame = ctk.CTkFrame(self, fg_color="transparent")
+        self.footer_frame = ctk.CTkFrame(self.bg_frame, fg_color="transparent")
         self.footer_frame.pack(fill="x", padx=35, pady=(25, 20))
 
         self.select_button = ctk.CTkButton(
@@ -102,7 +104,7 @@ class SPSSConverterApp(TkinterDnD.Tk):
             font=ctk.CTkFont(weight="bold"),
             fg_color="#0A84FF",
             hover_color="#0066CC",
-            corner_radius=12,  # Refined radius
+            corner_radius=12,
             command=self.browse_file
         )
         self.select_button.pack(side="left", fill="x", expand=True, padx=(0, 10))
@@ -114,14 +116,14 @@ class SPSSConverterApp(TkinterDnD.Tk):
             height=42,
             fg_color="#2A2A2A",
             hover_color="#333333",
-            corner_radius=12,  # Refined radius
+            corner_radius=12,
             command=self.show_about
         )
         self.about_btn.pack(side="right")
 
         # Status Overlay
         self.status_label = ctk.CTkLabel(
-            self,
+            self.bg_frame,
             text="Ready for conversion",
             font=ctk.CTkFont(size=12),
             text_color="#333333"
