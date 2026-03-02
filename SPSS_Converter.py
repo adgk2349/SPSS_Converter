@@ -1,5 +1,6 @@
 import os
 import sys
+import platform
 import pandas as pd
 import customtkinter as ctk
 from tkinter import messagebox, filedialog
@@ -13,25 +14,37 @@ class SPSSConverterApp(ctk.CTk):
     def __init__(self):
         super().__init__()
 
-        # Robust TkinterDnD loading for macOS/Windows with CustomTkinter
+        # --- Manual TkinterDnD Loading for macOS ---
         try:
-            # First try the standard way
+            import tkinterdnd2
+            dnd_base_path = os.path.dirname(tkinterdnd2.__file__)
+            
+            # Detect architecture
+            is_arm = platform.processor() == "arm" or "arm" in platform.machine().lower()
+            arch_folder = "osx-arm64" if is_arm else "osx-x64"
+            
+            tkdnd_path = os.path.join(dnd_base_path, 'tkdnd', arch_folder)
+            
+            # If the architecture folders aren't found, try the direct tkdnd folder
+            if not os.path.exists(tkdnd_path):
+                tkdnd_path = os.path.join(dnd_base_path, 'tkdnd')
+
+            self.tk.call('lappend', 'auto_path', tkdnd_path)
             self.tk.call('package', 'require', 'tkdnd')
-        except Exception:
-            # If it fails, try to find it in site-packages
+        except Exception as e:
+            print(f"Warning: Manual TkinterDnD loading failed: {e}")
+            # Fallback to standard requirement
             try:
-                import tkinterdnd2
-                path = os.path.dirname(tkinterdnd2.__file__)
-                tkdnd_path = os.path.join(path, 'tkdnd')
-                self.tk.call('lappend', 'auto_path', tkdnd_path)
                 self.tk.call('package', 'require', 'tkdnd')
-            except Exception as e:
-                print(f"Warning: TkinterDnD could not be loaded: {e}")
+            except:
+                pass
 
         # Window Setup
         self.title("SPSS Converter")
-        self.geometry("500x530")
-        self.configure(fg_color="#1A1A1A")  # Use fg_color for consistent macOS background
+        self.geometry("500x540")
+        
+        # FIX: Align root background with frame to prevent protrusion
+        self.configure(fg_color="#1A1A1A")
         self.attributes("-alpha", 0.98)
         self.resizable(False, False)
 
@@ -49,7 +62,7 @@ class SPSSConverterApp(ctk.CTk):
 
         self.version_label = ctk.CTkLabel(
             self.header_frame, 
-            text="v1.2.7", 
+            text="v1.2.8", 
             font=ctk.CTkFont(family="Inter", size=13),
             text_color="#555555"
         )
@@ -62,7 +75,7 @@ class SPSSConverterApp(ctk.CTk):
             height=28,
             fg_color="#2A2A2A",
             hover_color="#CC3333",
-            corner_radius=14, # Fully rounded
+            corner_radius=14, # Matches high curvature request
             command=self.quit
         )
         self.exit_button.pack(side="right")
@@ -71,18 +84,18 @@ class SPSSConverterApp(ctk.CTk):
         self.drop_container = ctk.CTkFrame(
             self,
             fg_color="#121212",
-            corner_radius=20, # Distinct rounded corners
-            border_color="#333333",
+            corner_radius=20, # Unified corner radius
+            border_color="#2A2A2A",
             border_width=1
         )
         self.drop_container.pack(fill="both", expand=True, padx=35, pady=0)
 
-        # Register Drag & Drop (Only if tkdnd is loaded)
+        # Enable Drag & Drop
         try:
             self.drop_container.drop_target_register(DND_FILES)
             self.drop_container.dnd_bind('<<Drop>>', self.handle_drop)
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"Warning: Drop target registration failed: {e}")
 
         # Drop Zone Content
         self.icon_label = ctk.CTkLabel(
@@ -111,7 +124,7 @@ class SPSSConverterApp(ctk.CTk):
             font=ctk.CTkFont(weight="bold"),
             fg_color="#0A84FF",
             hover_color="#0066CC",
-            corner_radius=21, # Pill shaped (matches Exit button)
+            corner_radius=21, # Pill shaped (50% of height)
             command=self.browse_file
         )
         self.select_button.pack(side="left", fill="x", expand=True, padx=(0, 10))
@@ -123,7 +136,7 @@ class SPSSConverterApp(ctk.CTk):
             height=42,
             fg_color="#2A2A2A",
             hover_color="#333333",
-            corner_radius=21, # Circular (matches Exit button)
+            corner_radius=21, # Circular (50% of height)
             command=self.show_about
         )
         self.about_btn.pack(side="right")
@@ -183,7 +196,7 @@ class SPSSConverterApp(ctk.CTk):
     def show_about(self):
         about_text = (
             "SPSS Converter\n"
-            "Version 1.2.7\n\n"
+            "Version 1.2.8\n\n"
             "Premium SPSS to CSV conversion tool.\n\n"
             "GitHub: adgk2349/SPSS_Converter"
         )
