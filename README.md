@@ -12,11 +12,12 @@ SPSS (`.sav`) 파일을 CSV 형식으로 변환해주는 간단한 파이썬 GUI
 - **One-Click Conversion**: Select and convert instantly.
 - **Cross-Platform**: Works on both macOS and Windows.
 
-### Requirements
-To run this script, you need to have Python installed along with the following libraries:
+### Requirements / 설치 요구사항
+To run this script, you need to have Python installed along with the following libraries:  
+이 스크립트를 실행하려면 파이썬과 아래 라이브러리 설치가 필요합니다:
 
 ```bash
-pip install pandas pyreadstat
+pip install pandas pyreadstat customtkinter tkinterdnd2
 ```
 
 ### How to Use
