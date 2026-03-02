@@ -1,23 +1,22 @@
 # SPSS Converter (SPSS SAV to CSV)
 
-A simple Python GUI tool to convert SPSS (`.sav`) files to CSV format.  
-SPSS (`.sav`) 파일을 CSV 형식으로 변환해주는 간단한 파이썬 GUI 도구입니다.
+A Python GUI tool to convert SPSS (`.sav`) files to CSV format, built with PyQt6.  
+SPSS (`.sav`) 파일을 CSV 형식으로 변환해주는 파이썬 GUI 도구입니다. (PyQt6 기반)
 
 ---
 
 ## 🇺🇸 English Instructions
 
 ### Features
-- **Simple GUI**: Clean and easy-to-use interface.
-- **One-Click Conversion**: Select and convert instantly.
-- **Cross-Platform**: Works on both macOS and Windows.
+- **Frameless rounded UI** — Native transparent rounded corners on macOS (PyQt6)
+- **Drag & Drop** — Drop `.sav` files directly onto the app window
+- **One-Click Conversion** — Select and convert instantly
+- **Status indicator** — Live conversion status in the app (no popup)
+- **Cross-Platform** — macOS and Windows
 
-### Requirements / 설치 요구사항
-To run this script, you need to have Python installed along with the following libraries:  
-이 스크립트를 실행하려면 파이썬과 아래 라이브러리 설치가 필요합니다:
-
+### Requirements
 ```bash
-pip install pandas pyreadstat customtkinter tkinterdnd2
+pip install PyQt6 pandas pyreadstat
 ```
 
 ### How to Use
@@ -25,17 +24,15 @@ pip install pandas pyreadstat customtkinter tkinterdnd2
    ```bash
    python3 SPSS_Converter.py
    ```
-2. **Select & Convert**: Click the button and choose your `.sav` file.
-3. **Success**: The converted `.csv` file will be saved in the same directory.
+2. **Drag & Drop** a `.sav` file onto the drop zone, or click **직접 선택 (Select File)**.
+3. **Done** — The `.csv` file is saved in the same directory as the original.
 
 ### Build as Executable
-You can use `PyInstaller` to create a standalone application:
-
 ```bash
-# For macOS (.app)
-pyinstaller --onefile --windowed --icon=SPSSCSV.icns SPSS_Converter.py
+# macOS (.app)
+pyinstaller Converter.spec
 
-# For Windows (.exe)
+# Windows (.exe)
 pyinstaller --onefile --windowed SPSS_Converter.py
 ```
 
@@ -44,15 +41,15 @@ pyinstaller --onefile --windowed SPSS_Converter.py
 ## 🇰🇷 한국어 설명
 
 ### 주요 기능
-- **간단한 GUI**: 깔끔하고 사용하기 쉬운 인터페이스.
-- **원클릭 변환**: 클릭 한 번으로 즉시 변환.
-- **교차 플랫폼**: 맥(macOS)과 윈도우(Windows) 모두 지원.
+- **프레임리스 라운드 UI** — macOS에서 진짜 투명 모서리 처리 (PyQt6)
+- **드래그 앤 드롭** — `.sav` 파일을 앱 창에 바로 드롭
+- **원클릭 변환** — 버튼 클릭으로 즉시 변환
+- **상태 표시** — 변환 결과를 앱 하단에 표시 (팝업 없음)
+- **교차 플랫폼** — macOS 및 Windows 지원
 
 ### 설치 요구사항
-이 스크립트를 실행하려면 파이썬과 아래 라이브러리 설치가 필요합니다:
-
 ```bash
-pip install pandas pyreadstat
+pip install PyQt6 pandas pyreadstat
 ```
 
 ### 사용 방법
@@ -60,15 +57,13 @@ pip install pandas pyreadstat
    ```bash
    python3 SPSS_Converter.py
    ```
-2. **파일 선택 및 변환**: 버튼을 클릭하고 `.sav` 파일을 선택하세요.
-3. **완료**: 변환된 `.csv` 파일이 같은 폴더에 저장됩니다.
+2. **드래그 앤 드롭**: `.sav` 파일을 드롭존에 끌어다 놓거나, **직접 선택 (Select File)** 버튼 클릭.
+3. **완료**: 변환된 `.csv` 파일이 원본과 같은 폴더에 저장됩니다.
 
 ### 실행 파일 만들기
-`PyInstaller`를 사용하여 독립 실행 파일을 만들 수 있습니다:
-
 ```bash
 # 맥용 (.app)
-pyinstaller --onefile --windowed --icon=SPSSCSV.icns SPSS_Converter.py
+pyinstaller Converter.spec
 
 # 윈도우용 (.exe)
 pyinstaller --onefile --windowed SPSS_Converter.py
