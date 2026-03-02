@@ -36,9 +36,13 @@ class SPSSConverterApp(ctk.CTk):
             except:
                 pass
 
-        # Window Setup - Frameless
-        self.overrideredirect(True) # Removes title bar
+        # Window Setup - Frameless with simulated rounding
+        self.overrideredirect(True) 
         self.geometry("500x540")
+        
+        # Transparent background trick for macOS (if supported)
+        # Note: True transparency for frameless rounded windows is complex in Tkinter
+        # We will use a main rounded frame that fills the window
         self.configure(fg_color="#1A1A1A")
         self.attributes("-alpha", 0.98)
         
@@ -46,8 +50,14 @@ class SPSSConverterApp(ctk.CTk):
         self._offsetx = 0
         self._offsety = 0
 
+        # Main Rounded Container (Simulating rounded window corners)
+        self.main_container = ctk.CTkFrame(self, fg_color="#1A1A1A", corner_radius=20)
+        self.main_container.pack(fill="both", expand=True)
+        self.main_container.bind("<Button-1>", self.start_drag)
+        self.main_container.bind("<B1-Motion>", self.do_drag)
+
         # Header Section (Acts as Drag Area)
-        self.header_frame = ctk.CTkFrame(self, fg_color="transparent")
+        self.header_frame = ctk.CTkFrame(self.main_container, fg_color="transparent")
         self.header_frame.pack(fill="x", padx=35, pady=(35, 15))
         self.header_frame.bind("<Button-1>", self.start_drag)
         self.header_frame.bind("<B1-Motion>", self.do_drag)
@@ -64,11 +74,13 @@ class SPSSConverterApp(ctk.CTk):
 
         self.version_label = ctk.CTkLabel(
             self.header_frame, 
-            text="v1.3.0", 
+            text="v1.3.1", 
             font=ctk.CTkFont(family="Inter", size=13),
             text_color="#555555"
         )
         self.version_label.pack(side="left", padx=12, pady=(8, 0))
+        self.version_label.bind("<Button-1>", self.start_drag)
+        self.version_label.bind("<B1-Motion>", self.do_drag)
 
         self.exit_button = ctk.CTkButton(
             self.header_frame, 
@@ -84,9 +96,9 @@ class SPSSConverterApp(ctk.CTk):
 
         # Drop Zone
         self.drop_container = ctk.CTkFrame(
-            self,
+            self.main_container,
             fg_color="#121212",
-            corner_radius=20,
+            corner_radius=22,
             border_color="#2A2A2A",
             border_width=1
         )
@@ -108,7 +120,7 @@ class SPSSConverterApp(ctk.CTk):
         self.instruction_label.place(relx=0.5, rely=0.5, anchor="center")
 
         # Footer Actions
-        self.footer_frame = ctk.CTkFrame(self, fg_color="transparent")
+        self.footer_frame = ctk.CTkFrame(self.main_container, fg_color="transparent")
         self.footer_frame.pack(fill="x", padx=35, pady=(25, 20))
 
         self.select_button = ctk.CTkButton(
@@ -137,7 +149,7 @@ class SPSSConverterApp(ctk.CTk):
 
         # Status Overlay
         self.status_label = ctk.CTkLabel(
-            self,
+            self.main_container,
             text="Ready for conversion",
             font=ctk.CTkFont(size=12),
             text_color="#333333"
@@ -186,9 +198,6 @@ class SPSSConverterApp(ctk.CTk):
             self.update_status(f"Done: {os.path.basename(csv_file_path)}", "#32D74B")
             messagebox.showinfo("Success", f"File saved as:\n{os.path.basename(csv_file_path)}")
             
-        except ImportError:
-            self.update_status("Dependency missing!", "#FF453A")
-            messagebox.showerror("Error", "The 'pyreadstat' library is required.")
         except Exception as e:
             self.update_status("Error occurred", "#FF453A")
             messagebox.showerror("Error", f"Failed to convert:\n{str(e)}")
@@ -197,13 +206,12 @@ class SPSSConverterApp(ctk.CTk):
         self.status_label.configure(text=text, text_color=color)
 
     def show_about(self):
-        # Custom "About" Window for clickable link
         about_window = ctk.CTkToplevel(self)
         about_window.title("About")
         about_window.geometry("380x280")
         about_window.resizable(False, False)
         about_window.configure(fg_color="#1A1A1A")
-        about_window.after(100, lambda: about_window.focus()) # Ensure focus
+        about_window.after(100, lambda: about_window.focus())
 
         content_frame = ctk.CTkFrame(about_window, fg_color="transparent")
         content_frame.pack(pady=30, padx=30, fill="both", expand=True)
@@ -217,7 +225,7 @@ class SPSSConverterApp(ctk.CTk):
 
         ctk.CTkLabel(
             content_frame, 
-            text="Version 1.2.9", 
+            text="Version 1.3.1", 
             font=ctk.CTkFont(size=12),
             text_color="#666666"
         ).pack(pady=(0, 20))
@@ -230,7 +238,6 @@ class SPSSConverterApp(ctk.CTk):
             justify="center"
         ).pack(pady=(0, 20))
 
-        # Clickable Link
         link_label = ctk.CTkLabel(
             content_frame, 
             text="github.com/adgk2349/SPSS_Converter", 
@@ -241,7 +248,6 @@ class SPSSConverterApp(ctk.CTk):
         link_label.pack()
         link_label.bind("<Button-1>", lambda e: webbrowser.open("https://github.com/adgk2349/SPSS_Converter"))
 
-        # Close Button
         ctk.CTkButton(
             content_frame,
             text="Close",
