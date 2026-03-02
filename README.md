@@ -28,13 +28,14 @@ pip install PyQt6 pandas pyreadstat
 3. **Done** — The `.csv` file is saved in the same directory as the original.
 
 ### Build as Executable
+The app must be built using the `.spec` file to ensure correct Qt6 plugin mapping:
+
 ```bash
 # macOS (.app)
-pyinstaller Converter.spec
-
-# Windows (.exe)
-pyinstaller --onefile --windowed SPSS_Converter.py
+/Users/seungminlee/anaconda3/bin/python -m PyInstaller --clean Converter.spec --noconfirm
 ```
+
+*Note: Avoid using `pyinstaller SPSS_Converter.py` directly as it may cause Qt plugin version conflicts.*
 
 ---
 
@@ -61,10 +62,11 @@ pip install PyQt6 pandas pyreadstat
 3. **완료**: 변환된 `.csv` 파일이 원본과 같은 폴더에 저장됩니다.
 
 ### 실행 파일 만들기
+Qt6 플러그인 충돌을 방지하기 위해 반드시 `.spec` 설정을 사용하여 빌드해야 합니다:
+
 ```bash
 # 맥용 (.app)
-pyinstaller Converter.spec
-
-# 윈도우용 (.exe)
-pyinstaller --onefile --windowed SPSS_Converter.py
+/Users/seungminlee/anaconda3/bin/python -m PyInstaller --clean Converter.spec --noconfirm
 ```
+
+*참고: `pyinstaller SPSS_Converter.py`를 직접 실행하면 Qt 플러그인 버전 오류가 발생할 수 있습니다.*
