@@ -28,18 +28,25 @@ a = Analysis(
         'tkinter', 'tkinterdnd2', 'matplotlib', 'scipy', 'torch', 'tensorflow', 'keras',
         'bokeh', 'pyarrow', 'selenium', 'sphinx', 'h5py', 'jedi', 'babel', 'nbformat',
         'IPython', 'zmq', 'pygments', 'docutils', 'PIL', 'lxml', 'cryptography', 'notebook',
-        'llvmlite', 'numba', 'pywt', 'skimage', 'tables'
+        'llvmlite', 'numba', 'pywt', 'skimage', 'tables',
+        'PyQt6.QtNetwork', 'PyQt6.QtQml', 'PyQt6.QtQuick', 'PyQt6.QtSql', 'PyQt6.QtXml', 'PyQt6.QtDBus',
+        'PyQt6.QtPositioning', 'PyQt6.QtMultimedia', 'PyQt6.QtBluetooth', 'PyQt6.QtSensors'
     ],
     noarchive=False,
     optimize=0,
 )
 
-# 불필요한 대형 바이너리 파일 필터링 (LLVM, Qt5 등)
+# 불필요한 대형 바이너리 파일 필터링 (LLVM, Qt5, Unused Qt6)
+exclude_bin_names = [
+    'libqt5', 'libllvm', 'libbrowser', 'libqt6network', 'libqt6qml', 'libqt6quick', 
+    'libqt6sql', 'libqt6xml', 'libqt6dbus', 'libqt6multimedia', 'libqt6bluetooth',
+    'libqt6positioning', 'libqt6sensors', 'libqt6web', 'libqt6remote'
+]
+
 a.binaries = [x for x in a.binaries if not 
-              (x[0].lower().startswith('libqt5') or 
-               'libllvm' in x[0].lower() or 
-               'libbrowser' in x[0].lower() or
-               'libQt5' in x[1])]
+              (any(name in x[0].lower() for name in exclude_bin_names) or 
+               'libQt5' in x[1] or 
+               ('Qt6' in x[1] and any(name[3:] in x[1].lower() for name in exclude_bin_names if name.startswith('libqt6'))))]
 
 pyz = PYZ(a.pure)
 
