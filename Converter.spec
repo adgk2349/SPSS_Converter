@@ -2,11 +2,11 @@
 
 
 a = Analysis(
-    ['Converter.py'],
+    ['SPSS_Converter.py'],
     pathex=[],
     binaries=[],
     datas=[],
-    hiddenimports=[],
+    hiddenimports=['PyQt6', 'PyQt6.QtWidgets', 'PyQt6.QtCore', 'PyQt6.QtGui', 'pyreadstat'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
@@ -45,7 +45,7 @@ coll = COLLECT(
 )
 app = BUNDLE(
     coll,
-    name='Converter.app',
+    name='SPSS_Converter.app',
     icon='SPSSCSV.icns',
     bundle_identifier=None,
 )
