@@ -39,13 +39,10 @@ class SPSSConverterApp(ctk.CTk):
         # Window Setup
         self.geometry("500x540")
         
-        # --- DEFINITIVE macOS Surgical Fix for Rounded Corners ---
+        # --- Surgical macOS Transparency Fix ---
         if platform.system() == "Darwin":
             self.overrideredirect(True)
-            # 1. Disable native shadow which causes the "square glow"
-            self.attributes("-hasShadow", False)
-            # 2. Key transparency commands at the native Tk level
-            # This bypasses CustomTkinter's fg_color validation
+            # Use native Tk commands to avoid CustomTkinter's color validation
             self.config(bg='systemTransparent')
             self.wm_attributes("-transparent", True)
             self.attributes("-alpha", 0.99)
@@ -57,17 +54,19 @@ class SPSSConverterApp(ctk.CTk):
         self._offsetx = 0
         self._offsety = 0
 
-        # Main Rounded Container (The visual window)
+        # Main Rounded Container (The "Visible" Window)
+        # bg_color must be "transparent" to allow the parent root's systemTransparent to show through the corners
         self.main_container = ctk.CTkFrame(
             self, 
             fg_color="#1A1A1A", 
+            bg_color="transparent", 
             corner_radius=28, 
             border_width=1,
-            border_color="#2A2A2A" # Subtle border helps define the edge
+            border_color="#2A2A2A"
         )
         self.main_container.pack(fill="both", expand=True, padx=2, pady=2) 
         
-        # Enable dragging from the main container
+        # Bind dragging
         self.main_container.bind("<Button-1>", self.start_drag)
         self.main_container.bind("<B1-Motion>", self.do_drag)
 
@@ -89,7 +88,7 @@ class SPSSConverterApp(ctk.CTk):
 
         self.version_label = ctk.CTkLabel(
             self.header_frame, 
-            text="v1.3.8", 
+            text="v1.3.9", 
             font=ctk.CTkFont(family="Inter", size=13),
             text_color="#555555"
         )
@@ -226,7 +225,6 @@ class SPSSConverterApp(ctk.CTk):
         about_window = ctk.CTkToplevel(self)
         if platform.system() == "Darwin":
             about_window.overrideredirect(True)
-            about_window.attributes("-hasShadow", False)
             about_window.config(bg='systemTransparent')
             about_window.wm_attributes("-transparent", True)
         else:
@@ -239,6 +237,7 @@ class SPSSConverterApp(ctk.CTk):
         main_about_frame = ctk.CTkFrame(
             about_window, 
             fg_color="#1A1A1A", 
+            bg_color="transparent", # Essential for rounding
             corner_radius=25,
             border_width=1,
             border_color="#2A2A2A"
@@ -257,7 +256,7 @@ class SPSSConverterApp(ctk.CTk):
 
         ctk.CTkLabel(
             content_frame, 
-            text="Version 1.3.8", 
+            text="Version 1.3.9", 
             font=ctk.CTkFont(size=12),
             text_color="#666666"
         ).pack(pady=(0, 20))
