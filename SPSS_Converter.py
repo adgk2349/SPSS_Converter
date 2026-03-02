@@ -36,22 +36,30 @@ class SPSSConverterApp(ctk.CTk):
             except:
                 pass
 
-        # Window Setup - Frameless with simulated rounding
-        self.overrideredirect(True) 
+        # Window Setup - Frameless with Rounding Fix
+        self.overrideredirect(True)
         self.geometry("500x540")
         
-        # Transparent background trick for macOS (if supported)
-        # Note: True transparency for frameless rounded windows is complex in Tkinter
-        # We will use a main rounded frame that fills the window
-        self.configure(fg_color="#1A1A1A")
-        self.attributes("-alpha", 0.98)
+        # macOS Transparency for rounded corners
+        if platform.system() == "Darwin":
+            self.configure(background='systemTransparent')
+            self.wm_attributes("-transparent", True)
+            self.attributes("-alpha", 0.98)
+        else:
+            self.configure(fg_color="#1A1A1A")
         
         # Windows Dragging Logic
         self._offsetx = 0
         self._offsety = 0
 
-        # Main Rounded Container (Simulating rounded window corners)
-        self.main_container = ctk.CTkFrame(self, fg_color="#1A1A1A", corner_radius=20)
+        # Main Rounded Container (Simulated Window)
+        self.main_container = ctk.CTkFrame(
+            self, 
+            fg_color="#1A1A1A", 
+            corner_radius=25, 
+            border_width=1,
+            border_color="#2A2A2A"
+        )
         self.main_container.pack(fill="both", expand=True)
         self.main_container.bind("<Button-1>", self.start_drag)
         self.main_container.bind("<B1-Motion>", self.do_drag)
@@ -74,7 +82,7 @@ class SPSSConverterApp(ctk.CTk):
 
         self.version_label = ctk.CTkLabel(
             self.header_frame, 
-            text="v1.3.1", 
+            text="v1.3.3", 
             font=ctk.CTkFont(family="Inter", size=13),
             text_color="#555555"
         )
@@ -90,7 +98,7 @@ class SPSSConverterApp(ctk.CTk):
             fg_color="#2A2A2A",
             hover_color="#CC3333",
             corner_radius=14,
-            command=self.quit
+            command=self.destroy # Reliable exit
         )
         self.exit_button.pack(side="right")
 
@@ -103,6 +111,8 @@ class SPSSConverterApp(ctk.CTk):
             border_width=1
         )
         self.drop_container.pack(fill="both", expand=True, padx=35, pady=0)
+        self.drop_container.bind("<Button-1>", self.start_drag)
+        self.drop_container.bind("<B1-Motion>", self.do_drag)
 
         try:
             self.drop_container.drop_target_register(DND_FILES)
@@ -225,7 +235,7 @@ class SPSSConverterApp(ctk.CTk):
 
         ctk.CTkLabel(
             content_frame, 
-            text="Version 1.3.1", 
+            text="Version 1.3.3", 
             font=ctk.CTkFont(size=12),
             text_color="#666666"
         ).pack(pady=(0, 20))
