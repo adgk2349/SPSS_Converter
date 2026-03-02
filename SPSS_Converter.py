@@ -1,6 +1,7 @@
 import os
 import sys
 import platform
+import webbrowser
 import pandas as pd
 import customtkinter as ctk
 from tkinter import messagebox, filedialog
@@ -19,21 +20,17 @@ class SPSSConverterApp(ctk.CTk):
             import tkinterdnd2
             dnd_base_path = os.path.dirname(tkinterdnd2.__file__)
             
-            # Detect architecture
             is_arm = platform.processor() == "arm" or "arm" in platform.machine().lower()
             arch_folder = "osx-arm64" if is_arm else "osx-x64"
             
             tkdnd_path = os.path.join(dnd_base_path, 'tkdnd', arch_folder)
             
-            # If the architecture folders aren't found, try the direct tkdnd folder
             if not os.path.exists(tkdnd_path):
                 tkdnd_path = os.path.join(dnd_base_path, 'tkdnd')
 
             self.tk.call('lappend', 'auto_path', tkdnd_path)
             self.tk.call('package', 'require', 'tkdnd')
-        except Exception as e:
-            print(f"Warning: Manual TkinterDnD loading failed: {e}")
-            # Fallback to standard requirement
+        except Exception:
             try:
                 self.tk.call('package', 'require', 'tkdnd')
             except:
@@ -42,8 +39,6 @@ class SPSSConverterApp(ctk.CTk):
         # Window Setup
         self.title("SPSS Converter")
         self.geometry("500x540")
-        
-        # FIX: Align root background with frame to prevent protrusion
         self.configure(fg_color="#1A1A1A")
         self.attributes("-alpha", 0.98)
         self.resizable(False, False)
@@ -62,7 +57,7 @@ class SPSSConverterApp(ctk.CTk):
 
         self.version_label = ctk.CTkLabel(
             self.header_frame, 
-            text="v1.2.8", 
+            text="v1.2.9", 
             font=ctk.CTkFont(family="Inter", size=13),
             text_color="#555555"
         )
@@ -75,43 +70,35 @@ class SPSSConverterApp(ctk.CTk):
             height=28,
             fg_color="#2A2A2A",
             hover_color="#CC3333",
-            corner_radius=14, # Matches high curvature request
+            corner_radius=14,
             command=self.quit
         )
         self.exit_button.pack(side="right")
 
-        # Drop Zone (Central unified area)
+        # Drop Zone
         self.drop_container = ctk.CTkFrame(
             self,
             fg_color="#121212",
-            corner_radius=20, # Unified corner radius
+            corner_radius=20,
             border_color="#2A2A2A",
             border_width=1
         )
         self.drop_container.pack(fill="both", expand=True, padx=35, pady=0)
 
-        # Enable Drag & Drop
         try:
             self.drop_container.drop_target_register(DND_FILES)
             self.drop_container.dnd_bind('<<Drop>>', self.handle_drop)
-        except Exception as e:
-            print(f"Warning: Drop target registration failed: {e}")
+        except Exception:
+            pass
 
-        # Drop Zone Content
-        self.icon_label = ctk.CTkLabel(
-            self.drop_container, 
-            text="📥", 
-            font=ctk.CTkFont(size=60)
-        )
-        self.icon_label.place(relx=0.5, rely=0.42, anchor="center")
-
+        # Drop Zone Content - Emojis removed
         self.instruction_label = ctk.CTkLabel(
             self.drop_container, 
             text="파일을 이곳으로 끌어다 놓으세요\nDrag and drop files here", 
             font=ctk.CTkFont(family="Inter", size=14),
             text_color="#666666"
         )
-        self.instruction_label.place(relx=0.5, rely=0.62, anchor="center")
+        self.instruction_label.place(relx=0.5, rely=0.5, anchor="center")
 
         # Footer Actions
         self.footer_frame = ctk.CTkFrame(self, fg_color="transparent")
@@ -119,24 +106,24 @@ class SPSSConverterApp(ctk.CTk):
 
         self.select_button = ctk.CTkButton(
             self.footer_frame, 
-            text="⊕ 직접 선택 (Select File)", 
+            text="직접 선택 (Select File)", 
             height=42,
             font=ctk.CTkFont(weight="bold"),
             fg_color="#0A84FF",
             hover_color="#0066CC",
-            corner_radius=21, # Pill shaped (50% of height)
+            corner_radius=21,
             command=self.browse_file
         )
         self.select_button.pack(side="left", fill="x", expand=True, padx=(0, 10))
 
         self.about_btn = ctk.CTkButton(
             self.footer_frame,
-            text="ⓘ",
-            width=42,
+            text="Info",
+            width=60,
             height=42,
             fg_color="#2A2A2A",
             hover_color="#333333",
-            corner_radius=21, # Circular (50% of height)
+            corner_radius=21,
             command=self.show_about
         )
         self.about_btn.pack(side="right")
@@ -194,13 +181,60 @@ class SPSSConverterApp(ctk.CTk):
         self.status_label.configure(text=text, text_color=color)
 
     def show_about(self):
-        about_text = (
-            "SPSS Converter\n"
-            "Version 1.2.8\n\n"
-            "Premium SPSS to CSV conversion tool.\n\n"
-            "GitHub: adgk2349/SPSS_Converter"
+        # Custom "About" Window for clickable link
+        about_window = ctk.CTkToplevel(self)
+        about_window.title("About")
+        about_window.geometry("380x280")
+        about_window.resizable(False, False)
+        about_window.configure(fg_color="#1A1A1A")
+        about_window.after(100, lambda: about_window.focus()) # Ensure focus
+
+        content_frame = ctk.CTkFrame(about_window, fg_color="transparent")
+        content_frame.pack(pady=30, padx=30, fill="both", expand=True)
+
+        ctk.CTkLabel(
+            content_frame, 
+            text="SPSS Converter", 
+            font=ctk.CTkFont(size=20, weight="bold"),
+            text_color="#FFFFFF"
+        ).pack(pady=(0, 5))
+
+        ctk.CTkLabel(
+            content_frame, 
+            text="Version 1.2.9", 
+            font=ctk.CTkFont(size=12),
+            text_color="#666666"
+        ).pack(pady=(0, 20))
+
+        ctk.CTkLabel(
+            content_frame, 
+            text="Premium SPSS to CSV conversion tool.\nDeveloped for macOS & Windows.", 
+            font=ctk.CTkFont(size=13),
+            text_color="#BBBBBB",
+            justify="center"
+        ).pack(pady=(0, 20))
+
+        # Clickable Link
+        link_label = ctk.CTkLabel(
+            content_frame, 
+            text="github.com/adgk2349/SPSS_Converter", 
+            font=ctk.CTkFont(size=13, underline=True),
+            text_color="#0A84FF",
+            cursor="hand2"
         )
-        messagebox.showinfo("About", about_text)
+        link_label.pack()
+        link_label.bind("<Button-1>", lambda e: webbrowser.open("https://github.com/adgk2349/SPSS_Converter"))
+
+        # Close Button
+        ctk.CTkButton(
+            content_frame,
+            text="Close",
+            width=100,
+            fg_color="#2A2A2A",
+            hover_color="#333333",
+            corner_radius=15,
+            command=about_window.destroy
+        ).pack(pady=(30, 0))
 
 if __name__ == "__main__":
     app = SPSSConverterApp()
