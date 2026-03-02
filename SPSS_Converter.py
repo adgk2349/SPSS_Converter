@@ -7,8 +7,17 @@ class SPSSConverterApp:
     def __init__(self, root):
         self.root = root
         self.root.title("SPSS SAV to CSV Converter")
-        self.root.geometry("400x200")
+        self.root.geometry("400x220")
         
+        # Create Menu
+        self.menu_bar = tk.Menu(self.root)
+        self.root.config(menu=self.menu_bar)
+        
+        # Help Menu
+        self.help_menu = tk.Menu(self.menu_bar, tearoff=0)
+        self.menu_bar.add_cascade(label="Help", menu=self.help_menu)
+        self.help_menu.add_command(label="About", command=self.show_about)
+
         # UI Elements
         self.label_instruction = tk.Label(root, text="Select an SPSS (.sav) file to convert:", pady=20)
         self.label_instruction.pack()
@@ -18,6 +27,16 @@ class SPSSConverterApp:
 
         self.status_label = tk.Label(root, text="", pady=20, fg="blue")
         self.status_label.pack()
+
+    def show_about(self):
+        about_text = (
+            "SPSS to CSV Converter\n"
+            "Version 1.0.0\n\n"
+            "A simple tool to convert .sav files to .csv\n"
+            "supporting both macOS and Windows.\n\n"
+            "GitHub: github.com/adgk2349/SPSS_Converter"
+        )
+        messagebox.showinfo("About", about_text)
 
     def convert_to_csv(self):
         file_path = filedialog.askopenfilename(
