@@ -13,22 +13,18 @@ ctk.set_default_color_theme("blue")
 
 class SPSSConverterApp(ctk.CTk):
     def __init__(self):
-        # 1. Initialize ctk.CTk but intercept the root configuration
+        # 1. Initialize ctk.CTk
         super().__init__()
 
         # --- Manual TkinterDnD Loading for macOS ---
         try:
             import tkinterdnd2
             dnd_base_path = os.path.dirname(tkinterdnd2.__file__)
-            
             is_arm = platform.processor() == "arm" or "arm" in platform.machine().lower()
             arch_folder = "osx-arm64" if is_arm else "osx-x64"
-            
             tkdnd_path = os.path.join(dnd_base_path, 'tkdnd', arch_folder)
-            
             if not os.path.exists(tkdnd_path):
                 tkdnd_path = os.path.join(dnd_base_path, 'tkdnd')
-
             self.tk.call('lappend', 'auto_path', tkdnd_path)
             self.tk.call('package', 'require', 'tkdnd')
         except Exception:
@@ -37,24 +33,23 @@ class SPSSConverterApp(ctk.CTk):
             except:
                 pass
 
-        # --- 2. THE ABSOLUTE macOS ROUNDING RESET (v1.4.0) ---
-        self.geometry("500x540")
+        # --- 2. NATIVE macOS WINDOW RECONSTRUCTION (v1.5.0) ---
+        self.geometry("520x560") # Slightly larger window to accommodate shadow cushion
         
         if platform.system() == "Darwin":
-            # Start completely invisible to prevent the "square flash"
-            self.attributes("-alpha", 0.0) 
+            # [NUCLEAR OPTION] 
+            # We DON'T use overrideredirect(True) because it causes square artifacts.
+            # Instead, we use a native macOS style that hides the titlebar but remains a "Normal" window.
+            try:
+                # 'help' style with 'none' decorations = Perfect Frameless + Native Rounding
+                self.tk.call("::tk::unsupported::MacWindowStyle", "style", self._w, "help", "none")
+            except:
+                self.overrideredirect(True)
             
-            # Hide title bar but maintain native window behaviors (shadows, rounding)
-            self.overrideredirect(True)
-            
-            # Force background transparency at the Tcl/Tk native level
-            # We use 'systemTransparent' to tell macOS to let pixels bleed through
+            # Root Transparency logic
             self.config(bg='systemTransparent')
             self.wm_attributes("-transparent", True)
-            
-            # Note: We do NOT use self.configure(fg_color=...) on the root here
-            # to avoid CTk filling the background with a square gray block.
-            # Instead, we let the inner Frame do the work.
+            self.attributes("-alpha", 0.0) # Start invisible
         else:
             self.overrideredirect(True)
             self.configure(fg_color="#1A1A1A")
@@ -63,21 +58,19 @@ class SPSSConverterApp(ctk.CTk):
         self._offsetx = 0
         self._offsety = 0
 
-        # --- 3. THE "FLOATING" MAIN CONTAINER ---
-        # This frame is the only thing the user actually sees.
-        # It MUST have bg_color="transparent" so the systemTransparent root shows through.
+        # --- 3. UI CONSTRUCTION ---
+        # Main Rounded Container (The Visual App Body)
+        # We add some padding at the root level to let the OS-rendered shadow work correctly
         self.main_container = ctk.CTkFrame(
             self, 
             fg_color="#1A1A1A", 
-            bg_color="transparent", # CRITICAL: Allows rounding against transparent root
-            corner_radius=30,        # Slightly deeper radius for premium feel
+            bg_color="transparent", # Crucial for showing systemTransparent root
+            corner_radius=32,        # Premium high curvature
             border_width=1,
             border_color="#2A2A2A"
         )
-        # Using larger padding (padx/pady=3) ensures the rounded edge isn't clipped by root
-        self.main_container.pack(fill="both", expand=True, padx=4, pady=4) 
+        self.main_container.pack(fill="both", expand=True, padx=10, pady=10) # Padding = Shadow Cushion
         
-        # Bind dragging to the entire main container
         self.main_container.bind("<Button-1>", self.start_drag)
         self.main_container.bind("<B1-Motion>", self.do_drag)
 
@@ -99,7 +92,7 @@ class SPSSConverterApp(ctk.CTk):
 
         self.version_label = ctk.CTkLabel(
             self.header_frame, 
-            text="v1.4.0", 
+            text="v1.5.0", 
             font=ctk.CTkFont(family="Inter", size=13),
             text_color="#555555"
         )
@@ -123,7 +116,7 @@ class SPSSConverterApp(ctk.CTk):
         self.drop_container = ctk.CTkFrame(
             self.main_container,
             fg_color="#121212",
-            corner_radius=22,
+            corner_radius=24,
             border_color="#2A2A2A",
             border_width=1
         )
@@ -140,7 +133,7 @@ class SPSSConverterApp(ctk.CTk):
         # Drop Zone Content
         self.instruction_label = ctk.CTkLabel(
             self.drop_container, 
-            text="파일을 이곳으로 끌어다 놓으세요\nDrag and drop files here", 
+            text="파일을 이곳으로 끌어다 넣으세요\nDrag and drop files here", 
             font=ctk.CTkFont(family="Inter", size=14),
             text_color="#666666"
         )
@@ -183,10 +176,9 @@ class SPSSConverterApp(ctk.CTk):
         )
         self.status_label.pack(pady=(0, 25))
 
-        # --- 4. FADE-IN & VISIBILITY ---
-        # A small delay ensures the transparency properties are baked in by the OS before showing.
+        # --- 4. ACTIVATION ---
         if platform.system() == "Darwin":
-            self.after(150, lambda: self.attributes("-alpha", 0.98))
+            self.after(200, lambda: self.attributes("-alpha", 0.98))
 
     def start_drag(self, event):
         self._offsetx = event.x
@@ -213,23 +205,19 @@ class SPSSConverterApp(ctk.CTk):
 
     def process_conversion(self, file_path):
         base_path, extension = os.path.splitext(file_path)
-        
         if extension.lower() != '.sav':
-            self.update_status("Invalid file format. Use .sav", "#FF453A")
+            self.update_status("Invalid file format", "#FF453A")
             messagebox.showerror("Error", "Please select a valid .sav file.")
             return
 
         try:
-            self.update_status("Converting... ⏳", "#FF9F0A")
+            self.update_status("Converting...", "#FF9F0A")
             self.update_idletasks()
-
             df = pd.read_spss(file_path)
             csv_file_path = f"{base_path}.csv"
             df.to_csv(csv_file_path, index=False)
-            
             self.update_status(f"Done: {os.path.basename(csv_file_path)}", "#32D74B")
             messagebox.showinfo("Success", f"File saved as:\n{os.path.basename(csv_file_path)}")
-            
         except Exception as e:
             self.update_status("Error occurred", "#FF453A")
             messagebox.showerror("Error", f"Failed to convert:\n{str(e)}")
@@ -240,74 +228,39 @@ class SPSSConverterApp(ctk.CTk):
     def show_about(self):
         about_window = ctk.CTkToplevel(self)
         if platform.system() == "Darwin":
-            about_window.attributes("-alpha", 0.0)
-            about_window.overrideredirect(True)
-            about_window.config(bg='systemTransparent')
-            about_window.wm_attributes("-transparent", True)
-            about_window.after(100, lambda: about_window.attributes("-alpha", 1.0))
+            try:
+                about_window.tk.call("::tk::unsupported::MacWindowStyle", "style", about_window._w, "help", "none")
+                about_window.config(bg='systemTransparent')
+                about_window.wm_attributes("-transparent", True)
+            except:
+                about_window.overrideredirect(True)
         else:
             about_window.overrideredirect(True)
 
-        about_window.title("About")
-        about_window.geometry("380x280")
-        about_window.resizable(False, False)
+        about_window.geometry("400x300")
         
         main_about_frame = ctk.CTkFrame(
             about_window, 
             fg_color="#1A1A1A", 
             bg_color="transparent",
-            corner_radius=25,
+            corner_radius=28,
             border_width=1,
             border_color="#2A2A2A"
         )
-        main_about_frame.pack(fill="both", expand=True, padx=4, pady=4)
+        main_about_frame.pack(fill="both", expand=True, padx=10, pady=10)
 
         content_frame = ctk.CTkFrame(main_about_frame, fg_color="transparent")
         content_frame.pack(pady=30, padx=30, fill="both", expand=True)
 
-        ctk.CTkLabel(
-            content_frame, 
-            text="SPSS Converter", 
-            font=ctk.CTkFont(size=20, weight="bold"),
-            text_color="#FFFFFF"
-        ).pack(pady=(0, 5))
+        ctk.CTkLabel(content_frame, text="SPSS Converter", font=ctk.CTkFont(size=20, weight="bold"), text_color="#FFFFFF").pack(pady=(0, 5))
+        ctk.CTkLabel(content_frame, text="Version 1.5.0", font=ctk.CTkFont(size=12), text_color="#666666").pack(pady=(0, 20))
+        ctk.CTkLabel(content_frame, text="Premium SPSS to CSV conversion tool.\nFinal Native Reconstruction Build.", font=ctk.CTkFont(size=13), text_color="#BBBBBB", justify="center").pack(pady=(0, 20))
 
-        ctk.CTkLabel(
-            content_frame, 
-            text="Version 1.4.0", 
-            font=ctk.CTkFont(size=12),
-            text_color="#666666"
-        ).pack(pady=(0, 20))
-
-        ctk.CTkLabel(
-            content_frame, 
-            text="Premium SPSS to CSV conversion tool.\nDeveloped for macOS & Windows.", 
-            font=ctk.CTkFont(size=13),
-            text_color="#BBBBBB",
-            justify="center"
-        ).pack(pady=(0, 20))
-
-        link_label = ctk.CTkLabel(
-            content_frame, 
-            text="github.com/adgk2349/SPSS_Converter", 
-            font=ctk.CTkFont(size=13, underline=True),
-            text_color="#0A84FF",
-            cursor="hand2"
-        )
+        link_label = ctk.CTkLabel(content_frame, text="github.com/adgk2349/SPSS_Converter", font=ctk.CTkFont(size=13, underline=True), text_color="#0A84FF", cursor="hand2")
         link_label.pack()
         link_label.bind("<Button-1>", lambda e: webbrowser.open("https://github.com/adgk2349/SPSS_Converter"))
 
-        ctk.CTkButton(
-            content_frame,
-            text="Close",
-            width=100,
-            fg_color="#2A2A2A",
-            hover_color="#333333",
-            corner_radius=15,
-            command=about_window.destroy
-        ).pack(pady=(30, 0))
-
-        about_window.after(100, lambda: about_window.focus())
+        ctk.CTkButton(content_frame, text="Close", width=100, fg_color="#2A2A2A", hover_color="#333333", corner_radius=15, command=about_window.destroy).pack(pady=(30, 0))
 
 if __name__ == "__main__":
     app = SPSSConverterApp()
