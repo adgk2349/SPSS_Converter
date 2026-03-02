@@ -9,16 +9,29 @@ from tkinterdnd2 import DND_FILES, TkinterDnD
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
 
-class SPSSConverterApp(ctk.CTk, TkinterDnD.DnDWrapper):
+class SPSSConverterApp(ctk.CTk):
     def __init__(self):
-        # Explicitly initialize both base classes
-        ctk.CTk.__init__(self)
-        TkinterDnD.DnDWrapper.__init__(self)
+        super().__init__()
+
+        # Robust TkinterDnD loading for macOS/Windows with CustomTkinter
+        try:
+            # First try the standard way
+            self.tk.call('package', 'require', 'tkdnd')
+        except Exception:
+            # If it fails, try to find it in site-packages
+            try:
+                import tkinterdnd2
+                path = os.path.dirname(tkinterdnd2.__file__)
+                tkdnd_path = os.path.join(path, 'tkdnd')
+                self.tk.call('lappend', 'auto_path', tkdnd_path)
+                self.tk.call('package', 'require', 'tkdnd')
+            except Exception as e:
+                print(f"Warning: TkinterDnD could not be loaded: {e}")
 
         # Window Setup
         self.title("SPSS Converter")
         self.geometry("500x530")
-        self.configure(fg_color="#1A1A1A")  # Native background handling
+        self.configure(fg_color="#1A1A1A")  # Use fg_color for consistent macOS background
         self.attributes("-alpha", 0.98)
         self.resizable(False, False)
 
@@ -36,7 +49,7 @@ class SPSSConverterApp(ctk.CTk, TkinterDnD.DnDWrapper):
 
         self.version_label = ctk.CTkLabel(
             self.header_frame, 
-            text="v1.2.6", 
+            text="v1.2.7", 
             font=ctk.CTkFont(family="Inter", size=13),
             text_color="#555555"
         )
@@ -49,7 +62,7 @@ class SPSSConverterApp(ctk.CTk, TkinterDnD.DnDWrapper):
             height=28,
             fg_color="#2A2A2A",
             hover_color="#CC3333",
-            corner_radius=14, # Fully round
+            corner_radius=14, # Fully rounded
             command=self.quit
         )
         self.exit_button.pack(side="right")
@@ -58,15 +71,18 @@ class SPSSConverterApp(ctk.CTk, TkinterDnD.DnDWrapper):
         self.drop_container = ctk.CTkFrame(
             self,
             fg_color="#121212",
-            corner_radius=20,
-            border_color="#2A2A2A",
+            corner_radius=20, # Distinct rounded corners
+            border_color="#333333",
             border_width=1
         )
         self.drop_container.pack(fill="both", expand=True, padx=35, pady=0)
 
-        # Register Drag & Drop
-        self.drop_container.drop_target_register(DND_FILES)
-        self.drop_container.dnd_bind('<<Drop>>', self.handle_drop)
+        # Register Drag & Drop (Only if tkdnd is loaded)
+        try:
+            self.drop_container.drop_target_register(DND_FILES)
+            self.drop_container.dnd_bind('<<Drop>>', self.handle_drop)
+        except Exception:
+            pass
 
         # Drop Zone Content
         self.icon_label = ctk.CTkLabel(
@@ -95,7 +111,7 @@ class SPSSConverterApp(ctk.CTk, TkinterDnD.DnDWrapper):
             font=ctk.CTkFont(weight="bold"),
             fg_color="#0A84FF",
             hover_color="#0066CC",
-            corner_radius=21, # Pill shaped (匹配 X 按钮)
+            corner_radius=21, # Pill shaped (matches Exit button)
             command=self.browse_file
         )
         self.select_button.pack(side="left", fill="x", expand=True, padx=(0, 10))
@@ -107,7 +123,7 @@ class SPSSConverterApp(ctk.CTk, TkinterDnD.DnDWrapper):
             height=42,
             fg_color="#2A2A2A",
             hover_color="#333333",
-            corner_radius=21, # Fully round (匹配 X 按钮)
+            corner_radius=21, # Circular (matches Exit button)
             command=self.show_about
         )
         self.about_btn.pack(side="right")
@@ -167,8 +183,8 @@ class SPSSConverterApp(ctk.CTk, TkinterDnD.DnDWrapper):
     def show_about(self):
         about_text = (
             "SPSS Converter\n"
-            "Version 1.2.5\n\n"
-            "Designed for macOS & Windows.\n\n"
+            "Version 1.2.7\n\n"
+            "Premium SPSS to CSV conversion tool.\n\n"
             "GitHub: adgk2349/SPSS_Converter"
         )
         messagebox.showinfo("About", about_text)
