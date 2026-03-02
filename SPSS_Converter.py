@@ -11,17 +11,18 @@ ctk.set_default_color_theme("blue")
 
 class SPSSConverterApp(ctk.CTk, TkinterDnD.DnDWrapper):
     def __init__(self):
-        super().__init__()
-        self.TkDnD_wrapper = TkinterDnD.DnDWrapper(self)
+        # Explicitly initialize both base classes
+        ctk.CTk.__init__(self)
+        TkinterDnD.DnDWrapper.__init__(self)
 
         # Window Setup
         self.title("SPSS Converter")
         self.geometry("500x530")
-        self.configure(fg_color="#1A1A1A")  # Use fg_color for ctk.CTk to handle background correctly
+        self.configure(fg_color="#1A1A1A")  # Native background handling
         self.attributes("-alpha", 0.98)
         self.resizable(False, False)
 
-        # Main Layout
+        # Header Section
         self.header_frame = ctk.CTkFrame(self, fg_color="transparent")
         self.header_frame.pack(fill="x", padx=35, pady=(35, 15))
 
@@ -35,7 +36,7 @@ class SPSSConverterApp(ctk.CTk, TkinterDnD.DnDWrapper):
 
         self.version_label = ctk.CTkLabel(
             self.header_frame, 
-            text="v1.2.5", 
+            text="v1.2.6", 
             font=ctk.CTkFont(family="Inter", size=13),
             text_color="#555555"
         )
@@ -48,7 +49,7 @@ class SPSSConverterApp(ctk.CTk, TkinterDnD.DnDWrapper):
             height=28,
             fg_color="#2A2A2A",
             hover_color="#CC3333",
-            corner_radius=14,
+            corner_radius=14, # Fully round
             command=self.quit
         )
         self.exit_button.pack(side="right")
@@ -63,7 +64,7 @@ class SPSSConverterApp(ctk.CTk, TkinterDnD.DnDWrapper):
         )
         self.drop_container.pack(fill="both", expand=True, padx=35, pady=0)
 
-        # Enable Drag & Drop on the container
+        # Register Drag & Drop
         self.drop_container.drop_target_register(DND_FILES)
         self.drop_container.dnd_bind('<<Drop>>', self.handle_drop)
 
@@ -94,7 +95,7 @@ class SPSSConverterApp(ctk.CTk, TkinterDnD.DnDWrapper):
             font=ctk.CTkFont(weight="bold"),
             fg_color="#0A84FF",
             hover_color="#0066CC",
-            corner_radius=21, # Circular rounding
+            corner_radius=21, # Pill shaped (匹配 X 按钮)
             command=self.browse_file
         )
         self.select_button.pack(side="left", fill="x", expand=True, padx=(0, 10))
@@ -106,7 +107,7 @@ class SPSSConverterApp(ctk.CTk, TkinterDnD.DnDWrapper):
             height=42,
             fg_color="#2A2A2A",
             hover_color="#333333",
-            corner_radius=21, # Circular rounding
+            corner_radius=21, # Fully round (匹配 X 按钮)
             command=self.show_about
         )
         self.about_btn.pack(side="right")
@@ -121,7 +122,6 @@ class SPSSConverterApp(ctk.CTk, TkinterDnD.DnDWrapper):
         self.status_label.pack(pady=(0, 15))
 
     def handle_drop(self, event):
-        # Handle cross-platform file path formatting
         data = event.data
         if data.startswith('{') and data.endswith('}'):
             data = data[1:-1]
