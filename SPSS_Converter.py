@@ -40,12 +40,13 @@ class SPSSConverterApp(ctk.CTk):
         self.overrideredirect(True)
         self.geometry("500x540")
         
-        # DEFINITIVE macOS Rounding Fix
+        # macOS Transparency Hard-Fix (Avoiding ValueError)
         if platform.system() == "Darwin":
-            self.configure(fg_color="transparent") # Important for CTk
-            self.config(bg="systemTransparent")    # Important for Tk
-            self.attributes("-alpha", 0.99)        # Triggers macOS redrawing
+            # Do NOT use fg_color="transparent" on root CTk window (causes ValueError)
+            # Use native Tkinter background config instead
+            self.config(bg="systemTransparent")
             self.wm_attributes("-transparent", True)
+            self.attributes("-alpha", 0.99)
         else:
             self.configure(fg_color="#1A1A1A")
         
@@ -53,15 +54,16 @@ class SPSSConverterApp(ctk.CTk):
         self._offsetx = 0
         self._offsety = 0
 
-        # Main Rounded Container (The "Visible" Window)
+        # Main Rounded Container (Drawing the actual window)
         self.main_container = ctk.CTkFrame(
             self, 
             fg_color="#1A1A1A", 
-            corner_radius=28, # Increased for more premium curve
+            corner_radius=28, 
             border_width=1,
             border_color="#2A2A2A"
         )
-        self.main_container.pack(fill="both", expand=True, padx=2, pady=2) # Slight padding to avoid clipping
+        # Small padding to prevent the OS from clipping the rounded corners
+        self.main_container.pack(fill="both", expand=True, padx=1, pady=1) 
         
         # Bind dragging to the entire window
         self.main_container.bind("<Button-1>", self.start_drag)
@@ -85,7 +87,7 @@ class SPSSConverterApp(ctk.CTk):
 
         self.version_label = ctk.CTkLabel(
             self.header_frame, 
-            text="v1.3.6", 
+            text="v1.3.7", 
             font=ctk.CTkFont(family="Inter", size=13),
             text_color="#555555"
         )
@@ -238,7 +240,7 @@ class SPSSConverterApp(ctk.CTk):
 
         ctk.CTkLabel(
             content_frame, 
-            text="Version 1.3.6", 
+            text="Version 1.3.7", 
             font=ctk.CTkFont(size=12),
             text_color="#666666"
         ).pack(pady=(0, 20))
