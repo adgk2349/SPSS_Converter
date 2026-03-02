@@ -24,12 +24,23 @@ a = Analysis(
     hooksconfig={},
     runtime_hooks=[],
     excludes=[
-        'PyQt5', 'PyQt5.QtCore', 'PyQt5.QtGui', 'PyQt5.QtWidgets', 'PyQt5.QtNetwork',
-        'tkinter', 'tkinterdnd2', 'matplotlib', 'scipy', 'torch', 'tensorflow', 'keras'
+        'PyQt5', 'PyQt5.QtCore', 'PyQt5.QtGui', 'PyQt5.QtWidgets', 'PyQt5.QtNetwork', 'PyQt5-sip',
+        'tkinter', 'tkinterdnd2', 'matplotlib', 'scipy', 'torch', 'tensorflow', 'keras',
+        'bokeh', 'pyarrow', 'selenium', 'sphinx', 'h5py', 'jedi', 'babel', 'nbformat',
+        'IPython', 'zmq', 'pygments', 'docutils', 'PIL', 'lxml', 'cryptography', 'notebook',
+        'llvmlite', 'numba', 'pywt', 'skimage', 'tables'
     ],
     noarchive=False,
     optimize=0,
 )
+
+# 불필요한 대형 바이너리 파일 필터링 (LLVM, Qt5 등)
+a.binaries = [x for x in a.binaries if not 
+              (x[0].lower().startswith('libqt5') or 
+               'libllvm' in x[0].lower() or 
+               'libbrowser' in x[0].lower() or
+               'libQt5' in x[1])]
+
 pyz = PYZ(a.pure)
 
 exe = EXE(
