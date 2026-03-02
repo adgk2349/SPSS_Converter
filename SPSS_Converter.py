@@ -15,24 +15,14 @@ class SPSSConverterApp(TkinterDnD.Tk):
 
         # Window Setup
         self.title("SPSS Converter")
-        self.geometry("500x580")
-        self.configure(bg="#0F0F0F")  # Deep macOS black
-        self.attributes("-alpha", 0.98)  # Subtle transparency for glass feel
+        self.geometry("500x520")
+        self.configure(bg="#1A1A1A")  # Consistent background
+        self.attributes("-alpha", 0.98)
         self.resizable(False, False)
 
-        # Main Container (Simulating Glass Surface)
-        self.main_frame = ctk.CTkFrame(
-            self, 
-            fg_color="#1E1E1E", 
-            corner_radius=20,
-            border_color="#3D3D3D",  # Lighter border for refraction effect
-            border_width=1
-        )
-        self.main_frame.pack(fill="both", expand=True, padx=25, pady=25)
-
-        # Header Section
-        self.header_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
-        self.header_frame.pack(fill="x", padx=20, pady=(20, 15))
+        # Main Layout (no outer padding to avoid window-in-window look)
+        self.header_frame = ctk.CTkFrame(self, fg_color="transparent")
+        self.header_frame.pack(fill="x", padx=35, pady=(35, 15))
 
         self.title_label = ctk.CTkLabel(
             self.header_frame, 
@@ -44,38 +34,38 @@ class SPSSConverterApp(TkinterDnD.Tk):
 
         self.version_label = ctk.CTkLabel(
             self.header_frame, 
-            text="v1.2.0", 
+            text="v1.2.1", 
             font=ctk.CTkFont(family="Inter", size=13),
-            text_color="#666666"
+            text_color="#555555"
         )
         self.version_label.pack(side="left", padx=12, pady=(8, 0))
 
         self.exit_button = ctk.CTkButton(
             self.header_frame, 
             text="✕", 
-            width=30, 
-            height=30,
-            fg_color="#333333",
+            width=28, 
+            height=28,
+            fg_color="#2A2A2A",
             hover_color="#CC3333",
-            corner_radius=15,
+            corner_radius=14,
             command=self.quit
         )
         self.exit_button.pack(side="right")
 
-        # Drop Zone (Inner Glass Layer)
+        # Drop Zone (Central unified area)
         self.drop_container = ctk.CTkFrame(
-            self.main_frame,
+            self,
             fg_color="#121212",
-            corner_radius=25,
+            corner_radius=20,
             border_color="#2A2A2A",
             border_width=1
         )
-        self.drop_container.pack(fill="both", expand=True, padx=20, pady=10)
+        self.drop_container.pack(fill="both", expand=True, padx=35, pady=0)
 
         self.drop_frame = ctk.CTkFrame(
             self.drop_container, 
             fg_color="transparent",
-            corner_radius=25
+            corner_radius=20
         )
         self.drop_frame.pack(fill="both", expand=True)
 
@@ -87,30 +77,30 @@ class SPSSConverterApp(TkinterDnD.Tk):
         self.icon_label = ctk.CTkLabel(
             self.drop_frame, 
             text="📥", 
-            font=ctk.CTkFont(size=70)
+            font=ctk.CTkFont(size=60)
         )
         self.icon_label.place(relx=0.5, rely=0.42, anchor="center")
 
         self.instruction_label = ctk.CTkLabel(
             self.drop_frame, 
             text="파일을 이곳으로 끌어다 놓으세요\nDrag and drop files here", 
-            font=ctk.CTkFont(family="Inter", size=15),
-            text_color="#888888"
+            font=ctk.CTkFont(family="Inter", size=14),
+            text_color="#666666"
         )
         self.instruction_label.place(relx=0.5, rely=0.62, anchor="center")
 
         # Footer Actions
-        self.footer_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
-        self.footer_frame.pack(fill="x", padx=20, pady=(20, 20))
+        self.footer_frame = ctk.CTkFrame(self, fg_color="transparent")
+        self.footer_frame.pack(fill="x", padx=35, pady=(25, 20))
 
         self.select_button = ctk.CTkButton(
             self.footer_frame, 
             text="⊕ 직접 선택 (Select File)", 
-            height=45,
+            height=40,
             font=ctk.CTkFont(weight="bold"),
-            fg_color="#0A84FF",  # macOS Accent Blue
+            fg_color="#0A84FF",
             hover_color="#0066CC",
-            corner_radius=12,
+            corner_radius=10,
             command=self.browse_file
         )
         self.select_button.pack(side="left", fill="x", expand=True, padx=(0, 10))
@@ -118,21 +108,21 @@ class SPSSConverterApp(TkinterDnD.Tk):
         self.about_btn = ctk.CTkButton(
             self.footer_frame,
             text="ⓘ",
-            width=45,
-            height=45,
-            fg_color="#333333",
-            hover_color="#444444",
-            corner_radius=12,
+            width=40,
+            height=40,
+            fg_color="#2A2A2A",
+            hover_color="#333333",
+            corner_radius=10,
             command=self.show_about
         )
         self.about_btn.pack(side="right")
 
-        # Status Overlay (Smooth Appearance)
+        # Status Overlay
         self.status_label = ctk.CTkLabel(
-            self.main_frame,
+            self,
             text="Ready for conversion",
             font=ctk.CTkFont(size=12),
-            text_color="#444444"
+            text_color="#333333"
         )
         self.status_label.pack(pady=(0, 15))
 
