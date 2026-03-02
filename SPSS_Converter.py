@@ -52,11 +52,13 @@ class SPSSConverterApp(TkinterDnD.Tk):
         )
         self.exit_button.pack(side="right")
 
+        # Header Section (no change)
+
         # Drop Zone (Central unified area)
         self.drop_container = ctk.CTkFrame(
             self,
             fg_color="#121212",
-            corner_radius=20,
+            corner_radius=15,  # Unified radius
             border_color="#2A2A2A",
             border_width=1
         )
@@ -65,7 +67,7 @@ class SPSSConverterApp(TkinterDnD.Tk):
         self.drop_frame = ctk.CTkFrame(
             self.drop_container, 
             fg_color="transparent",
-            corner_radius=20
+            corner_radius=15  # Unified radius
         )
         self.drop_frame.pack(fill="both", expand=True)
 
@@ -96,11 +98,11 @@ class SPSSConverterApp(TkinterDnD.Tk):
         self.select_button = ctk.CTkButton(
             self.footer_frame, 
             text="⊕ 직접 선택 (Select File)", 
-            height=40,
+            height=42,
             font=ctk.CTkFont(weight="bold"),
             fg_color="#0A84FF",
             hover_color="#0066CC",
-            corner_radius=10,
+            corner_radius=12,  # Refined radius
             command=self.browse_file
         )
         self.select_button.pack(side="left", fill="x", expand=True, padx=(0, 10))
@@ -108,11 +110,11 @@ class SPSSConverterApp(TkinterDnD.Tk):
         self.about_btn = ctk.CTkButton(
             self.footer_frame,
             text="ⓘ",
-            width=40,
-            height=40,
+            width=42,
+            height=42,
             fg_color="#2A2A2A",
             hover_color="#333333",
-            corner_radius=10,
+            corner_radius=12,  # Refined radius
             command=self.show_about
         )
         self.about_btn.pack(side="right")
