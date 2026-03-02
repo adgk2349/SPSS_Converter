@@ -40,10 +40,11 @@ class SPSSConverterApp(ctk.CTk):
         self.overrideredirect(True)
         self.geometry("500x540")
         
-        # macOS Transparency for rounded corners
+        # Hard Fix for macOS rounded corners
         if platform.system() == "Darwin":
-            self.configure(background='systemTransparent')
             self.wm_attributes("-transparent", True)
+            self.config(bg='systemTransparent')
+            # Extra attribute to ensure no shadow artifacts
             self.attributes("-alpha", 0.98)
         else:
             self.configure(fg_color="#1A1A1A")
@@ -82,7 +83,7 @@ class SPSSConverterApp(ctk.CTk):
 
         self.version_label = ctk.CTkLabel(
             self.header_frame, 
-            text="v1.3.3", 
+            text="v1.3.5", 
             font=ctk.CTkFont(family="Inter", size=13),
             text_color="#555555"
         )
@@ -98,7 +99,7 @@ class SPSSConverterApp(ctk.CTk):
             fg_color="#2A2A2A",
             hover_color="#CC3333",
             corner_radius=14,
-            command=self.destroy # Reliable exit
+            command=self.destroy
         )
         self.exit_button.pack(side="right")
 
@@ -162,9 +163,9 @@ class SPSSConverterApp(ctk.CTk):
             self.main_container,
             text="Ready for conversion",
             font=ctk.CTkFont(size=12),
-            text_color="#333333"
+            text_color="#666666"
         )
-        self.status_label.pack(pady=(0, 15))
+        self.status_label.pack(pady=(0, 25))
 
     def start_drag(self, event):
         self._offsetx = event.x
@@ -235,7 +236,7 @@ class SPSSConverterApp(ctk.CTk):
 
         ctk.CTkLabel(
             content_frame, 
-            text="Version 1.3.3", 
+            text="Version 1.3.5", 
             font=ctk.CTkFont(size=12),
             text_color="#666666"
         ).pack(pady=(0, 20))
