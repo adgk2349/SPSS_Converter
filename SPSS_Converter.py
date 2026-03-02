@@ -39,16 +39,13 @@ class SPSSConverterApp(ctk.CTk):
         # Window Setup
         self.geometry("500x540")
         
-        # --- Surgical macOS Rounded Corner Fix ---
+        # --- DEFINITIVE macOS Surgical Fix for Rounded Corners ---
         if platform.system() == "Darwin":
-            # 1. Use a native macOS window style that supports rounding and removes titlebar
-            # 'moveableModal' with 'none' is a robust way to hide titlebar without overrideredirect(True) issues
-            try:
-                self.tk.call("::tk::unsupported::MacWindowStyle", "style", self._w, "moveableByWindowBackground", "none")
-            except:
-                self.overrideredirect(True) # Fallback if specialty command fails
-            
-            # 2. Force transparency
+            self.overrideredirect(True)
+            # 1. Disable native shadow which causes the "square glow"
+            self.attributes("-hasShadow", False)
+            # 2. Key transparency commands at the native Tk level
+            # This bypasses CustomTkinter's fg_color validation
             self.config(bg='systemTransparent')
             self.wm_attributes("-transparent", True)
             self.attributes("-alpha", 0.99)
@@ -60,17 +57,17 @@ class SPSSConverterApp(ctk.CTk):
         self._offsetx = 0
         self._offsety = 0
 
-        # Main Rounded Container (Drawing the window boundary)
+        # Main Rounded Container (The visual window)
         self.main_container = ctk.CTkFrame(
             self, 
             fg_color="#1A1A1A", 
             corner_radius=28, 
             border_width=1,
-            border_color="#2A2A2A"
+            border_color="#2A2A2A" # Subtle border helps define the edge
         )
         self.main_container.pack(fill="both", expand=True, padx=2, pady=2) 
         
-        # Dragging bindings
+        # Enable dragging from the main container
         self.main_container.bind("<Button-1>", self.start_drag)
         self.main_container.bind("<B1-Motion>", self.do_drag)
 
@@ -227,14 +224,11 @@ class SPSSConverterApp(ctk.CTk):
 
     def show_about(self):
         about_window = ctk.CTkToplevel(self)
-        # Apply the same macOS fix for About window
         if platform.system() == "Darwin":
-             try:
-                about_window.tk.call("::tk::unsupported::MacWindowStyle", "style", about_window._w, "moveableByWindowBackground", "none")
-                about_window.config(bg='systemTransparent')
-                about_window.wm_attributes("-transparent", True)
-             except:
-                about_window.overrideredirect(True)
+            about_window.overrideredirect(True)
+            about_window.attributes("-hasShadow", False)
+            about_window.config(bg='systemTransparent')
+            about_window.wm_attributes("-transparent", True)
         else:
             about_window.overrideredirect(True)
 
