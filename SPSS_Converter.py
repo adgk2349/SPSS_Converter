@@ -13,7 +13,8 @@ def _fix_qt_plugin_path():
     except Exception:
         pass
 
-_fix_qt_plugin_path()
+if not getattr(sys, "frozen", False):
+    _fix_qt_plugin_path()
 
 import pandas as pd
 
