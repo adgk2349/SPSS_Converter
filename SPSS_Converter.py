@@ -15,111 +15,126 @@ class SPSSConverterApp(TkinterDnD.Tk):
 
         # Window Setup
         self.title("SPSS Converter")
-        self.geometry("500x550")
-        self.configure(bg="#1A1A1A")
+        self.geometry("500x580")
+        self.configure(bg="#0F0F0F")  # Deep macOS black
+        self.attributes("-alpha", 0.98)  # Subtle transparency for glass feel
         self.resizable(False, False)
 
-        # Main Container
-        self.main_frame = ctk.CTkFrame(self, fg_color="#1A1A1A", corner_radius=0)
-        self.main_frame.pack(fill="both", expand=True, padx=30, pady=20)
+        # Main Container (Simulating Glass Surface)
+        self.main_frame = ctk.CTkFrame(
+            self, 
+            fg_color="#1E1E1E", 
+            corner_radius=20,
+            border_color="#3D3D3D",  # Lighter border for refraction effect
+            border_width=1
+        )
+        self.main_frame.pack(fill="both", expand=True, padx=25, pady=25)
 
         # Header Section
         self.header_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
-        self.header_frame.pack(fill="x", pady=(10, 20))
+        self.header_frame.pack(fill="x", padx=20, pady=(20, 15))
 
         self.title_label = ctk.CTkLabel(
             self.header_frame, 
             text="SPSS Converter", 
-            font=ctk.CTkFont(family="Inter", size=24, weight="bold"),
+            font=ctk.CTkFont(family="Inter", size=26, weight="bold"),
             text_color="#FFFFFF"
         )
         self.title_label.pack(side="left")
 
         self.version_label = ctk.CTkLabel(
             self.header_frame, 
-            text="v1.1.0", 
-            font=ctk.CTkFont(family="Inter", size=12),
-            text_color="#888888"
+            text="v1.2.0", 
+            font=ctk.CTkFont(family="Inter", size=13),
+            text_color="#666666"
         )
-        self.version_label.pack(side="left", padx=10, pady=(8, 0))
+        self.version_label.pack(side="left", padx=12, pady=(8, 0))
 
         self.exit_button = ctk.CTkButton(
             self.header_frame, 
-            text="✕ Exit", 
-            width=70, 
-            height=32,
-            fg_color="#2A2A2A",
-            hover_color="#3A3A3A",
-            corner_radius=16,
+            text="✕", 
+            width=30, 
+            height=30,
+            fg_color="#333333",
+            hover_color="#CC3333",
+            corner_radius=15,
             command=self.quit
         )
         self.exit_button.pack(side="right")
 
-        # Drop Zone Area
+        # Drop Zone (Inner Glass Layer)
+        self.drop_container = ctk.CTkFrame(
+            self.main_frame,
+            fg_color="#121212",
+            corner_radius=25,
+            border_color="#2A2A2A",
+            border_width=1
+        )
+        self.drop_container.pack(fill="both", expand=True, padx=20, pady=10)
+
         self.drop_frame = ctk.CTkFrame(
-            self.main_frame, 
-            fg_color="#121212", 
-            border_color="#333333", 
-            border_width=2,
+            self.drop_container, 
+            fg_color="transparent",
             corner_radius=25
         )
-        self.drop_frame.pack(fill="both", expand=True, pady=10)
+        self.drop_frame.pack(fill="both", expand=True)
 
-        # Drag & Drop functional binding
+        # Drag & Drop binding
         self.drop_frame.drop_target_register(DND_FILES)
         self.drop_frame.dnd_bind('<<Drop>>', self.handle_drop)
 
         # Drop Zone Content
         self.icon_label = ctk.CTkLabel(
             self.drop_frame, 
-            text="📄", 
-            font=ctk.CTkFont(size=60)
+            text="📥", 
+            font=ctk.CTkFont(size=70)
         )
-        self.icon_label.place(relx=0.5, rely=0.4, anchor="center")
+        self.icon_label.place(relx=0.5, rely=0.42, anchor="center")
 
         self.instruction_label = ctk.CTkLabel(
             self.drop_frame, 
             text="파일을 이곳으로 끌어다 놓으세요\nDrag and drop files here", 
-            font=ctk.CTkFont(family="Inter", size=14),
-            text_color="#BBBBBB"
+            font=ctk.CTkFont(family="Inter", size=15),
+            text_color="#888888"
         )
-        self.instruction_label.place(relx=0.5, rely=0.6, anchor="center")
+        self.instruction_label.place(relx=0.5, rely=0.62, anchor="center")
 
         # Footer Actions
         self.footer_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
-        self.footer_frame.pack(fill="x", pady=(20, 10))
+        self.footer_frame.pack(fill="x", padx=20, pady=(20, 20))
 
         self.select_button = ctk.CTkButton(
             self.footer_frame, 
             text="⊕ 직접 선택 (Select File)", 
-            height=40,
-            fg_color="#2A2A2A",
-            hover_color="#3A3A3A",
-            corner_radius=20,
+            height=45,
+            font=ctk.CTkFont(weight="bold"),
+            fg_color="#0A84FF",  # macOS Accent Blue
+            hover_color="#0066CC",
+            corner_radius=12,
             command=self.browse_file
         )
-        self.select_button.pack(side="left")
+        self.select_button.pack(side="left", fill="x", expand=True, padx=(0, 10))
 
-        self.status_label = ctk.CTkLabel(
-            self.main_frame,
-            text="Ready to convert",
-            font=ctk.CTkFont(size=12),
-            text_color="#555555"
-        )
-        self.status_label.pack(pady=(10, 0))
-
-        # About Menu (Hidden or as sub-button)
         self.about_btn = ctk.CTkButton(
             self.footer_frame,
             text="ⓘ",
-            width=40,
-            height=40,
-            fg_color="transparent",
-            hover_color="#2A2A2A",
-            corner_radius=20,
+            width=45,
+            height=45,
+            fg_color="#333333",
+            hover_color="#444444",
+            corner_radius=12,
             command=self.show_about
         )
         self.about_btn.pack(side="right")
+
+        # Status Overlay (Smooth Appearance)
+        self.status_label = ctk.CTkLabel(
+            self.main_frame,
+            text="Ready for conversion",
+            font=ctk.CTkFont(size=12),
+            text_color="#444444"
+        )
+        self.status_label.pack(pady=(0, 15))
 
     def handle_drop(self, event):
         files = self.tk.splitlist(event.data)
@@ -138,26 +153,26 @@ class SPSSConverterApp(TkinterDnD.Tk):
         base_path, extension = os.path.splitext(file_path)
         
         if extension.lower() != '.sav':
-            self.update_status("Invalid file format. Use .sav", "#FF5555")
+            self.update_status("Invalid file format. Use .sav", "#FF453A")  # macOS Red
             messagebox.showerror("Error", "Please select a valid .sav file.")
             return
 
         try:
-            self.update_status("Processing... Please wait.", "#FFA500")
+            self.update_status("Converting... ⏳", "#FF9F0A")  # macOS Orange
             self.update_idletasks()
 
             df = pd.read_spss(file_path)
             csv_file_path = f"{base_path}.csv"
             df.to_csv(csv_file_path, index=False)
             
-            self.update_status(f"Converted: {os.path.basename(csv_file_path)}", "#55FF55")
+            self.update_status(f"Done: {os.path.basename(csv_file_path)}", "#32D74B")  # macOS Green
             messagebox.showinfo("Success", f"File saved as:\n{os.path.basename(csv_file_path)}")
             
         except ImportError:
-            self.update_status("Dependency missing!", "#FF5555")
+            self.update_status("Dependency missing!", "#FF453A")
             messagebox.showerror("Error", "The 'pyreadstat' library is required.")
         except Exception as e:
-            self.update_status("An error occurred.", "#FF5555")
+            self.update_status("Error occurred", "#FF453A")
             messagebox.showerror("Error", f"Failed to convert:\n{str(e)}")
 
     def update_status(self, text, color):
@@ -166,8 +181,8 @@ class SPSSConverterApp(TkinterDnD.Tk):
     def show_about(self):
         about_text = (
             "SPSS Converter\n"
-            "Version 1.1.0\n\n"
-            "Premium SPSS to CSV conversion tool.\n\n"
+            "Version 1.2.0\n\n"
+            "Designed for macOS & Windows.\n\n"
             "GitHub: adgk2349/SPSS_Converter"
         )
         messagebox.showinfo("About", about_text)
